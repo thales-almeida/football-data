@@ -1,7 +1,5 @@
-import pandas as pd
-
 from utils.config import BRONZE_PATH, SILVER_PATH
-from utils.common import read_latest_bronze, upsert_silver_parquet
+from utils.common import normalize_bronze_data, read_latest_bronze, upsert_silver_parquet
 from datetime import datetime, timezone
 
 
@@ -11,27 +9,17 @@ def transform_areas():
         endpoint_name="areas"
     )
 
-    df = pd.json_normalize(data)
+    df = normalize_bronze_data(data)
 
     df = df.rename(columns={
         "id": "area_id",
         "name": "area_name",
         "flag": "area_flag",
-        "countryCode": "area_country_code",
-        "parentArea": "continent"
+        "country_code": "area_country_code",
+        "parent_area": "continent"
     })
 
-    expected_columns = [
-        "area_id",
-        "area_name",
-        "area_flag",
-        "area_country_code",
-        "continent"
-    ]
-
-    df = df[[col for col in expected_columns if col in df.columns]]
-
-    for col in ["area_id"]:
+    for col in ["area_id", "parent_area_id"]:
         if col in df.columns:
             df[col] = df[col].astype("Int64")
 

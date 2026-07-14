@@ -1,7 +1,7 @@
 import pandas as pd
 
 from utils.config import BRONZE_PATH, SILVER_PATH
-from utils.common import read_latest_bronze, upsert_silver_parquet
+from utils.common import normalize_bronze_data, read_latest_bronze, upsert_silver_parquet
 from datetime import datetime, timezone
 
 
@@ -11,29 +11,14 @@ def transform_teams():
         endpoint_name="teams"
     )
 
-    df = pd.json_normalize(data)
+    df = normalize_bronze_data(data)
 
     df = df.rename(columns={
         "id": "team_id",
         "name": "team_name",
-        "shortName": "team_short_name",
-        "clubColors": "team_colors"
+        "short_name": "team_short_name",
+        "club_colors": "team_colors"
     })
-
-    expected_columns = [
-        "team_id",
-        "team_name",
-        "team_short_name",
-        "tla",
-        "founded",
-        "team_colors",
-        "venue",
-        "website",
-        "address",
-        "crest"
-    ]
-
-    df = df[[col for col in expected_columns if col in df.columns]]
 
     for col in ["team_id", "founded"]:
         if col in df.columns:
@@ -42,6 +27,11 @@ def transform_teams():
     for col in ["team_name", "team_short_name", "tla", "crest", "venue", "website", "address", "team_colors"]:
         if col in df.columns:
             df[col] = df[col].astype("string")
+
+    if "last_updated" in df.columns:
+        df["last_updated"] = pd.to_datetime(
+            df["last_updated"], utc=True, errors="coerce"
+        )
 
     df = df.dropna(subset=["team_id"])
     df = df.drop_duplicates(subset=["team_id"], keep="last")

@@ -8,5 +8,3 @@ API_TOKEN = os.getenv("FOOTBALL_API_TOKEN")
 
 BRONZE_PATH = "../data/bronze/football_data"
 SILVER_PATH = "../data/silver/football_data"
-
-print(API_BASE_URL)

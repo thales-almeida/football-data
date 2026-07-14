@@ -1,3 +1,8 @@
-venv/
-.env
+.agents/
+.codex/
+.vscode
+airflow/
 data/
+venv/
+venv-airflow/
+.env
