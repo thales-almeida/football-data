@@ -1,8 +1,20 @@
 import json
+import re
 from pathlib import Path
 from datetime import datetime, timezone
 
 import pandas as pd
+
+
+def normalize_bronze_data(data: dict | list) -> pd.DataFrame:
+    df = pd.json_normalize(data, sep="_")
+
+    def to_snake_case(column: str) -> str:
+        column = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", column)
+        column = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", column)
+        return column.lower()
+
+    return df.rename(columns=to_snake_case)
 
 
 def get_latest_bronze_file(

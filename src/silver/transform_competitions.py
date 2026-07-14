@@ -1,7 +1,7 @@
 import pandas as pd
 
 from utils.config import BRONZE_PATH, SILVER_PATH
-from utils.common import read_latest_bronze, upsert_silver_parquet
+from utils.common import normalize_bronze_data, read_latest_bronze, upsert_silver_parquet
 from datetime import datetime, timezone
 
 
@@ -11,37 +11,37 @@ def transform_competitions():
         endpoint_name="competitions"
     )
 
-    df = pd.json_normalize(data)
+    df = normalize_bronze_data(data)
 
     df = df.rename(columns={
         "id": "competition_id",
         "name": "competition_name",
         "type": "competition_type",
         "code": "competition_code",
-        "numberOfAvailableSeasons": "number_of_available_seasons",
     })
 
-    expected_columns = [
+    integer_columns = [
         "competition_id",
-        "competition_name",
-        "competition_code",
-        "competition_type",
         "area_id",
-        "emblem",
-        "plan",
         "current_season_id",
+        "current_season_current_matchday",
+        "current_season_winner_id",
+        "current_season_winner_founded",
         "number_of_available_seasons"
     ]
-
-    df = df[[col for col in expected_columns if col in df.columns]]
-
-    for col in ["competition_id", "area_id", "current_season_id", "number_of_available_seasons"]:
+    for col in integer_columns:
         if col in df.columns:
             df[col] = df[col].astype("Int64")
 
-    for col in ["competition_name", "competition_code", "competition_type", "emblem", "plan"]:
+    datetime_columns = [
+        "last_updated",
+        "current_season_start_date",
+        "current_season_end_date",
+        "current_season_winner_last_updated"
+    ]
+    for col in datetime_columns:
         if col in df.columns:
-            df[col] = df[col].astype("string")
+            df[col] = pd.to_datetime(df[col], utc=True, errors="coerce")
 
     df = df.dropna(subset=["competition_id"])
     df = df.drop_duplicates(subset=["competition_id"], keep="last")
