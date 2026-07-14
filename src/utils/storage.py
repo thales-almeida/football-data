@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 def save_json(
     data: dict,
     endpoint_name: str,
-    base_path: str
+    base_path: str | Path
 ) -> str:
     extracted_at = datetime.now(timezone.utc)
     timestamp_file = extracted_at.strftime("%Y%m%dT%H%M%SZ")

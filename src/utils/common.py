@@ -18,7 +18,7 @@ def normalize_bronze_data(data: dict | list) -> pd.DataFrame:
 
 
 def get_latest_bronze_file(
-    bronze_base_path: str,
+    bronze_base_path: str | Path,
     endpoint_name: str
 ) -> Path:
     endpoint_path = Path(bronze_base_path) / endpoint_name
@@ -36,7 +36,7 @@ def get_latest_bronze_file(
 
 
 def read_latest_bronze(
-    bronze_base_path: str,
+    bronze_base_path: str | Path,
     endpoint_name: str
 ) -> tuple[dict | list, Path]:
     latest_file = get_latest_bronze_file(
@@ -63,7 +63,7 @@ def read_latest_bronze(
 
 def upsert_silver_parquet(
     df_new: pd.DataFrame,
-    silver_base_path: str,
+    silver_base_path: str | Path,
     table_name: str,
     key_columns: list[str],
     extracted_at: str | None = None
