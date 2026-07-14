@@ -1,7 +1,10 @@
 .agents/
 .codex/
 .vscode
-airflow/
+airflow/*
+!airflow/dags/
+airflow/dags/*
+!airflow/dags/*.py
 data/
 venv/
 venv-airflow/
